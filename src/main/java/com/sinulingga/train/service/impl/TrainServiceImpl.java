@@ -2,6 +2,7 @@ package com.sinulingga.train.service.impl;
 
 import com.sinulingga.train.entity.Train;
 import com.sinulingga.train.exception.BadRequestException;
+import com.sinulingga.train.exception.CodeAlreadyExistsException;
 import com.sinulingga.train.exception.DataNotFoundException;
 import com.sinulingga.train.payload.request.TrainRequestAdd;
 import com.sinulingga.train.payload.response.TrainResponseDetail;
@@ -29,7 +30,7 @@ public class TrainServiceImpl implements TrainService {
     @Transactional
     @Override
     public void addTrain(TrainRequestAdd request)
-            throws BadRequestException, DataIntegrityViolationException {
+            throws BadRequestException, CodeAlreadyExistsException, DataIntegrityViolationException {
         try {
             if (request.getName() == null || request.getName().trim().length() == 0)
                 throw new BadRequestException("Name can't empty.");
@@ -46,10 +47,14 @@ public class TrainServiceImpl implements TrainService {
 
             Boolean isExists = trainRepository.existsByCode(request.getCode());
             if (isExists)
-                throw new BadRequestException("Code already exists.");
+                throw new CodeAlreadyExistsException("Code already exists.");
 
             trainRepository.save(new Train(request));
         } catch (BadRequestException e) {
+            LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            e.getStackTrace();
+            throw e;
+        } catch (CodeAlreadyExistsException e) {
             LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
             e.getStackTrace();
             throw e;
