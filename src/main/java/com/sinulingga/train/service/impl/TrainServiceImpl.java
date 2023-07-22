@@ -2,7 +2,9 @@ package com.sinulingga.train.service.impl;
 
 import com.sinulingga.train.entity.Train;
 import com.sinulingga.train.exception.BadRequestException;
+import com.sinulingga.train.exception.DataNotFoundException;
 import com.sinulingga.train.payload.request.TrainRequestAdd;
+import com.sinulingga.train.payload.response.TrainResponseDetail;
 import com.sinulingga.train.repository.TrainRepository;
 import com.sinulingga.train.service.TrainService;
 import org.slf4j.Logger;
@@ -14,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TrainServiceImpl implements TrainService {
@@ -46,41 +50,41 @@ public class TrainServiceImpl implements TrainService {
 
             trainRepository.save(new Train(request));
         } catch (BadRequestException e) {
-            LOG.info(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
             e.getStackTrace();
             throw e;
         } catch (DataIntegrityViolationException e) {
-            LOG.info(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
             e.getStackTrace();
             throw e;
         }catch (Exception e) {
             e.getStackTrace();
-            LOG.info(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
             throw e;
         }
     }
 
     @Override
-    public void addTrains(List<TrainRequestAdd> request)
-            throws BadRequestException {
+    public TrainResponseDetail getTrainById(String id) throws DataNotFoundException, IllegalArgumentException {
         try {
-            if (request.size() == 0)
-                throw new BadRequestException("Data can't empty.");
+            UUID idUuid = UUID.fromString(id);
 
-            List<Train> data = new ArrayList<>();
-            for (TrainRequestAdd item : request) {
-                if (item.getName().trim().length() == 0)
-                    throw new BadRequestException("Name can't empty.");
-                if (item.getCapacity() <= 0)
-                    throw  new BadRequestException("Capacity should greater than 0.");
+            Optional<Train> optional = trainRepository.findById(idUuid);
+            if (optional.isEmpty())
+                throw new DataNotFoundException("Data not found");
 
-                data.add(new Train(item));
-            }
-
-            trainRepository.saveAll(data);
-        } catch (BadRequestException e) {
+            return new TrainResponseDetail(optional.get());
+        } catch (IllegalArgumentException  e) {
+            LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            e.getStackTrace();
+            throw e;
+        } catch (DataNotFoundException e) {
+            LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            e.getStackTrace();
             throw e;
         } catch (Exception e) {
+            LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            e.getStackTrace();
             throw e;
         }
     }

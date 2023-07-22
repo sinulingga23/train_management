@@ -2,6 +2,8 @@ package com.sinulingga.train.entity;
 
 import com.sinulingga.train.payload.request.TrainRequestAdd;
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
@@ -16,7 +18,9 @@ import java.util.UUID;
 public class Train extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "varchar(36)")
     private UUID id;
+
     @Column(nullable = false, length = 150)
     private String name;
     @Column(nullable = true)
