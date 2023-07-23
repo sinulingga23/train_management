@@ -197,10 +197,6 @@ public class TrainHandler {
             @RequestParam(required = false) String name
     ) {
         try {
-            LOG.info("currentPage: " + currentPage);
-            LOG.info("perPage: " + perPage);
-            LOG.info("name: " + name);
-            LOG.info("------------------------");
             List<TrainResponseDetail> listDetail = trainService.getTrains(currentPage, perPage, name);
 
             GenericResponse response = Response.makeGenericResponse(
