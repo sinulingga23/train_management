@@ -13,13 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class TrainServiceImpl implements TrainService {
@@ -163,11 +163,61 @@ public class TrainServiceImpl implements TrainService {
 
     @Override
     public void deleteTrainById(String id) throws DataNotFoundException, IllegalArgumentException {
+        try {
+            UUID uuid = UUID.fromString(id);
+            boolean isExists = trainRepository.existsById(uuid);
+            if (!isExists)
+                throw new DataNotFoundException("Data not found.");
 
+            trainRepository.deleteById(uuid);
+        } catch (IllegalArgumentException e) {
+            LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            e.getStackTrace();
+            throw e;
+        } catch (DataNotFoundException e) {
+            LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            e.getStackTrace();
+            throw e;
+        }
     }
 
     @Override
-    public List<TrainResponseDetail> getTrains() throws DataNotFoundException {
-        return null;
+    public List<TrainResponseDetail> getTrains(int currentPage, int perPage, String name)
+            throws DataNotFoundException {
+        try {
+            // one-based index
+            currentPage -= 1;
+            if (currentPage <= 0 ) {
+                currentPage = 0;
+            }
+
+            if (perPage <= 0 || perPage > 100) {
+                perPage = 10;
+            }
+
+            Pageable pageable = PageRequest.of(currentPage, perPage);
+
+            Page<Train> page;
+            if (name != null && name.trim().length() != 0) {
+                page = trainRepository.findByNameContaining(name, pageable);
+            } else {
+                page = trainRepository.findAll(pageable);
+            }
+
+            if (page.isEmpty())
+                throw new DataNotFoundException("Data not found");
+
+            List<TrainResponseDetail> listDetail = new ArrayList<>();
+            page.forEach(train -> {
+                listDetail.add(new TrainResponseDetail(train));
+            });
+
+
+            return listDetail;
+        } catch (DataNotFoundException e) {
+            LOG.warn(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            e.getStackTrace();
+            throw  e;
+        }
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -151,6 +152,68 @@ public class TrainHandler {
             GenericResponse response = Response.makeGenericResponse(
                     Response.RC_INVALID_ID,
                     Response.RD_INVALID_ID,
+                    null
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @DeleteMapping("/train/{id}")
+    public ResponseEntity<GenericResponse> deleteTrainById(@PathVariable String id) {
+        try {
+            trainService.deleteTrainById(id);
+
+            GenericResponse response = Response.makeGenericResponse(
+                    Response.RC_SUCCESS,
+                    Response.RD_SUCCESS,
+                    null
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            GenericResponse response = Response.makeGenericResponse(
+                    Response.RC_INVALID_ID,
+                    Response.RD_INVALID_ID,
+                    null
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (DataNotFoundException e) {
+            GenericResponse response = Response.makeGenericResponse(
+                    Response.RC_DATA_NOT_FOUND,
+                    Response.RD_DATA_NOT_FOUND,
+                    null
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/train")
+    public ResponseEntity<GenericResponse> getTrains(
+            @RequestParam(required = true, defaultValue = "1") int currentPage,
+            @RequestParam(required = false, defaultValue = "10") int perPage,
+            @RequestParam(required = false) String name
+    ) {
+        try {
+            LOG.info("currentPage: " + currentPage);
+            LOG.info("perPage: " + perPage);
+            LOG.info("name: " + name);
+            LOG.info("------------------------");
+            List<TrainResponseDetail> listDetail = trainService.getTrains(currentPage, perPage, name);
+
+            GenericResponse response = Response.makeGenericResponse(
+                    Response.RC_SUCCESS,
+                    Response.RD_SUCCESS,
+                    listDetail
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (DataNotFoundException e) {
+            GenericResponse response = Response.makeGenericResponse(
+                    Response.RC_DATA_NOT_FOUND,
+                    Response.RD_DATA_NOT_FOUND,
                     null
             );
 

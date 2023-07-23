@@ -29,6 +29,6 @@ public interface TrainService {
             throws
             DataNotFoundException,
             IllegalArgumentException;
-    List<TrainResponseDetail> getTrains()
+    List<TrainResponseDetail> getTrains(int perPage, int currentPage, String name)
             throws DataNotFoundException;
 }
