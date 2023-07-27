@@ -3,7 +3,9 @@ package com.sinulingga.train.service.impl;
 import com.sinulingga.train.entity.Station;
 import com.sinulingga.train.exception.BadRequestException;
 import com.sinulingga.train.exception.CodeAlreadyExistsException;
+import com.sinulingga.train.exception.DataNotFoundException;
 import com.sinulingga.train.payload.request.StationRequestAdd;
+import com.sinulingga.train.payload.response.StationResponseDetail;
 import com.sinulingga.train.repository.StationRepository;
 import com.sinulingga.train.service.StationService;
 import org.slf4j.Logger;
@@ -12,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class StationServiceImpl implements StationService {
@@ -52,6 +57,27 @@ public class StationServiceImpl implements StationService {
             e.getStackTrace();
             throw e;
         } catch (DataIntegrityViolationException e) {
+            LOG.info(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            e.getStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public StationResponseDetail getStationById(String id) throws DataNotFoundException, IllegalArgumentException {
+        try {
+            UUID uuid = UUID.fromString(id);
+
+            Optional<Station> optional = stationRepository.findById(uuid);
+            if (optional.isEmpty())
+                throw new DataNotFoundException("Data not found");
+
+            return new StationResponseDetail(optional.get());
+        } catch (DataNotFoundException e) {
+            LOG.info(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
+            e.getStackTrace();
+            throw e;
+        } catch (IllegalArgumentException e) {
             LOG.info(String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage()));
             e.getStackTrace();
             throw e;

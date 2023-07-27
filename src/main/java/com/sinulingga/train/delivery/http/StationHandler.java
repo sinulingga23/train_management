@@ -3,8 +3,10 @@ package com.sinulingga.train.delivery.http;
 import com.sinulingga.train.constant.Response;
 import com.sinulingga.train.exception.BadRequestException;
 import com.sinulingga.train.exception.CodeAlreadyExistsException;
+import com.sinulingga.train.exception.DataNotFoundException;
 import com.sinulingga.train.payload.request.StationRequestAdd;
 import com.sinulingga.train.payload.response.GenericResponse;
+import com.sinulingga.train.payload.response.StationResponseDetail;
 import com.sinulingga.train.service.StationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/station-management/api/v1")
@@ -58,6 +57,37 @@ public class StationHandler {
                     Response.RC_INTERNAL_ERROR,
                     Response.RD_INTERNAL_ERROR,
                     e.getClass().getSimpleName()
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/station/{id}")
+    public ResponseEntity<GenericResponse> getStationById(@PathVariable String id) {
+        try {
+            StationResponseDetail detail = stationService.getStationById(id);
+
+            GenericResponse response = Response.makeGenericResponse(
+                    Response.RC_SUCCESS,
+                    Response.RD_SUCCESS,
+                    detail
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (DataNotFoundException e) {
+            GenericResponse response = Response.makeGenericResponse(
+                    Response.RC_DATA_NOT_FOUND,
+                    Response.RD_DATA_NOT_FOUND,
+                    null
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            GenericResponse response = Response.makeGenericResponse(
+                    Response.RC_INVALID_ID,
+                    Response.RD_INVALID_ID,
+                    null
             );
 
             return new ResponseEntity<>(response, HttpStatus.OK);
