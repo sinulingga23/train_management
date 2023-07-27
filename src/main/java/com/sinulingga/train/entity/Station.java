@@ -1,7 +1,9 @@
 package com.sinulingga.train.entity;
 
+import com.sinulingga.train.payload.request.StationRequestAdd;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity(name = "station")
@@ -25,6 +27,16 @@ public class Station extends BaseEntity {
 
     public Station() {
 
+    }
+
+    public Station(StationRequestAdd request) {
+        this.id = UUID.randomUUID();
+        this.address = request.getAddress();
+        this.code = request.getCode();
+        this.description = request.getDescription();
+        this.name = request.getName();
+        this.setCreatedBy("System");
+        this.setCreatedAt(LocalDateTime.now());
     }
 
     public UUID getId() {

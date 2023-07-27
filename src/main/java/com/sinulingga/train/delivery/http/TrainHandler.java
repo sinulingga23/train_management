@@ -8,7 +8,7 @@ import com.sinulingga.train.payload.request.TrainRequestAdd;
 import com.sinulingga.train.payload.request.TrainRequestUpdate;
 import com.sinulingga.train.payload.response.GenericResponse;
 import com.sinulingga.train.payload.response.TrainResponseDetail;
-import com.sinulingga.train.service.impl.TrainServiceImpl;
+import com.sinulingga.train.service.TrainService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @RestController
@@ -28,7 +26,7 @@ public class TrainHandler {
     private final Logger LOG = LoggerFactory.getLogger(TrainHandler.class);
 
     @Autowired
-    private TrainServiceImpl trainService;
+    private TrainService trainService;
 
     @PostMapping("/train")
     public ResponseEntity<GenericResponse> addTrain(@RequestBody TrainRequestAdd request) {

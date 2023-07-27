@@ -2,8 +2,6 @@ package com.sinulingga.train.entity;
 
 import com.sinulingga.train.payload.request.TrainRequestAdd;
 import jakarta.persistence.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
